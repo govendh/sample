@@ -1,1 +1,1893 @@
-welcome code
+A*
+
+#include <stdio.h>
+#include <limits.h>
+#define MAX 20
+
+int main() {
+    int graph[MAX][MAX] = {0};
+    int h[MAX], g[MAX], f[MAX], parent[MAX];
+    int open[MAX], closed[MAX];
+    int n, e;
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    printf("Enter each edge (source destination cost):\n");
+
+    for (int i = 0; i < e; i++) {
+        int u, v, cost;
+        scanf("%d %d %d", &u, &v, &cost);
+
+        u--;
+        v--;
+        graph[u][v] = cost;
+    }
+
+    printf("\nEnter heuristic values:\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("h[%d] = ", i + 1);
+        scanf("%d", &h[i]);
+    }
+
+    int source, goal;
+
+    printf("Enter source vertex: ");
+    scanf("%d", &source);
+
+    printf("Enter goal vertex: ");
+    scanf("%d", &goal);
+
+    source--;
+    goal--;
+
+    for (int i = 0; i < n; i++) {
+        g[i] = INT_MAX;
+        f[i] = INT_MAX;
+        parent[i] = -1;
+        open[i] = 0;
+        closed[i] = 0;
+    }
+
+    g[source] = 0;
+    f[source] = h[source];
+    open[source] = 1;
+
+    while (1) {
+        int current = -1;
+        int minF = INT_MAX;
+
+        for (int i = 0; i < n; i++) {
+            if (open[i] && f[i] < minF) {
+                minF = f[i];
+                current = i;
+            }
+        }
+
+        if (current == -1) {
+            printf("\nNo path exists.\n");
+            return 0;
+        }
+
+        if (current == goal)
+            break;
+
+        open[current] = 0;
+        closed[current] = 1;
+
+        for (int i = 0; i < n; i++) {
+            if (graph[current][i] > 0 && !closed[i]) {
+                int tg = g[current] + graph[current][i];
+
+                if (!open[i] || tg < g[i]) {
+                    parent[i] = current;
+                    g[i] = tg;
+                    f[i] = g[i] + h[i];
+                    open[i] = 1;
+                }
+            }
+        }
+    }
+
+    int path[MAX];
+    int count = 0;
+    int temp = goal;
+
+    while (temp != -1) {
+        path[count++] = temp;
+        temp = parent[temp];
+    }
+
+    printf("\nShortest Path:\n");
+
+    for (int i = count - 1; i >= 0; i--) {
+        printf("%d", path[i] + 1);
+
+        if (i > 0)
+            printf(" -> ");
+    }
+
+    printf("\nTotal Cost = %d\n", g[goal]);
+
+    return 0;
+}
+
+Enter number of vertices: 5
+Enter number of edges: 6
+Enter each edge (source destination cost):
+1 2 1
+1 3 4
+2 3 2
+2 4 5
+3 4 1
+4 5 3
+
+Enter heuristic values:
+h[1] = 7
+h[2] = 6
+h[3] = 4
+h[4] = 3
+h[5] = 0
+Enter source vertex: 1
+Enter goal vertex: 5
+
+---------
+ucs
+
+#include <stdio.h>
+#include <limits.h>
+#define MAX 20
+
+int main() {
+    int graph[MAX][MAX] = {0};
+    int g[MAX], parent[MAX];
+    int open[MAX], closed[MAX];
+    int n, e;
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    printf("Enter each edge (source destination cost):\n");
+
+    for (int i = 0; i < e; i++) {
+        int u, v, cost;
+        scanf("%d %d %d", &u, &v, &cost);
+
+        u--;
+        v--;
+        graph[u][v] = cost;
+    }
+
+    int source, goal;
+
+    printf("Enter source vertex: ");
+    scanf("%d", &source);
+
+    printf("Enter goal vertex: ");
+    scanf("%d", &goal);
+
+    source--;
+    goal--;
+
+    for (int i = 0; i < n; i++) {
+        g[i] = INT_MAX;
+        parent[i] = -1;
+        open[i] = 0;
+        closed[i] = 0;
+    }
+
+    g[source] = 0;
+    open[source] = 1;
+
+    while (1) {
+        int current = -1;
+        int minCost = INT_MAX;
+
+        for (int i = 0; i < n; i++) {
+            if (open[i] && g[i] < minCost) {
+                minCost = g[i];
+                current = i;
+            }
+        }
+
+        if (current == -1) {
+            printf("\nNo path exists.\n");
+            return 0;
+        }
+
+        if (current == goal)
+            break;
+
+        open[current] = 0;
+        closed[current] = 1;
+
+        for (int i = 0; i < n; i++) {
+            if (graph[current][i] > 0 && !closed[i]) {
+                int tg = g[current] + graph[current][i];
+
+                if (!open[i] || tg < g[i]) {
+                    parent[i] = current;
+                    g[i] = tg;
+                    open[i] = 1;
+                }
+            }
+        }
+    }
+
+    int path[MAX];
+    int count = 0;
+    int temp = goal;
+
+    while (temp != -1) {
+        path[count++] = temp;
+        temp = parent[temp];
+    }
+
+    printf("\nShortest Path:\n");
+
+    for (int i = count - 1; i >= 0; i--) {
+        printf("%d", path[i] + 1);
+
+        if (i > 0)
+            printf(" -> ");
+    }
+
+    printf("\nTotal Cost = %d\n", g[goal]);
+
+    return 0;
+}
+
+------------
+greedy bfs
+
+#include <stdio.h>
+#include <limits.h>
+#define MAX 20
+
+int main() {
+    int graph[MAX][MAX] = {0};
+    int h[MAX], parent[MAX];
+    int open[MAX], closed[MAX];
+    int n, e;
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    printf("Enter each edge (source destination cost):\n");
+
+    for (int i = 0; i < e; i++) {
+        int u, v, cost;
+        scanf("%d %d %d", &u, &v, &cost);
+
+        u--;
+        v--;
+        graph[u][v] = cost;
+    }
+
+    printf("\nEnter heuristic values:\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("h[%d] = ", i + 1);
+        scanf("%d", &h[i]);
+    }
+
+    int source, goal;
+
+    printf("Enter source vertex: ");
+    scanf("%d", &source);
+
+    printf("Enter goal vertex: ");
+    scanf("%d", &goal);
+
+    source--;
+    goal--;
+
+    for (int i = 0; i < n; i++) {
+        parent[i] = -1;
+        open[i] = 0;
+        closed[i] = 0;
+    }
+
+    open[source] = 1;
+
+    while (1) {
+        int current = -1;
+        int minH = INT_MAX;
+
+        for (int i = 0; i < n; i++) {
+            if (open[i] && h[i] < minH) {
+                minH = h[i];
+                current = i;
+            }
+        }
+
+        if (current == -1) {
+            printf("\nNo path exists.\n");
+            return 0;
+        }
+
+        if (current == goal)
+            break;
+
+        open[current] = 0;
+        closed[current] = 1;
+
+        for (int i = 0; i < n; i++) {
+            if (graph[current][i] > 0 &&
+                !open[i] && !closed[i]) {
+                parent[i] = current;
+                open[i] = 1;
+            }
+        }
+    }
+
+    int path[MAX];
+    int count = 0;
+    int temp = goal;
+
+    while (temp != -1) {
+        path[count++] = temp;
+        temp = parent[temp];
+    }
+
+    printf("\nPath:\n");
+
+    for (int i = count - 1; i >= 0; i--) {
+        printf("%d", path[i] + 1);
+
+        if (i > 0)
+            printf(" -> ");
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+---------
+
+Hill Climbing
+
+#include <stdio.h>
+#define MAX 20
+
+int main() {
+    int n, h[MAX], i;
+    int current = 0, next;
+
+    printf("Enter number of states: ");
+    scanf("%d", &n);
+
+    printf("Enter heuristic values:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &h[i]);
+    }
+
+    int globalMax = h[0];
+    int globalIndex = 0;
+
+    for (i = 1; i < n; i++) {
+        if (h[i] > globalMax) {
+            globalMax = h[i];
+            globalIndex = i;
+        }
+    }
+
+    printf("\nPath:\n");
+    printf("%d(h=%d)", current, h[current]);
+
+    while (1) {
+        next = current;
+
+        if (current > 0 && h[current - 1] > h[next])
+            next = current - 1;
+
+        if (current < n - 1 && h[current + 1] > h[next])
+            next = current + 1;
+
+        if (next == current)
+            break;
+
+        current = next;
+
+        printf(" -> %d(h=%d)", current, h[current]);
+    }
+
+    printf("\n\nLocal Maximum State = %d", current);
+    printf("\nHeuristic Value = %d", h[current]);
+    printf("\nGlobal Maximum State = %d", globalIndex);
+    printf("\nGlobal Maximum Value = %d", globalMax);
+
+    if (h[current] == globalMax)
+        printf("\n\nGoal Reached (Global Maximum).\n");
+    else
+        printf("\n\nStopped at Local Maximum.\n");
+
+    return 0;
+}
+
+Enter number of states: 5
+Enter heuristic values:
+1 3 7 5 9
+
+--------------
+Simulated Annealing (1d)
+
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    int n, current = 0, goalState = 0;
+    int h[20];
+
+    float T = 100.0;
+    float cooling = 0.90;
+
+    printf("Enter number of states: ");
+    scanf("%d", &n);
+
+    printf("Enter heuristic values:\n");
+
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &h[i]);
+
+        if (h[i] > h[goalState])
+            goalState = i;
+    }
+
+    printf("\nPath:\n");
+    printf("%d(h=%d)", current, h[current]);
+
+    while (T > 1 && current < n - 1) {
+        if (current == goalState)
+            break;
+
+        int next = current + 1;
+        int delta = h[next] - h[current];
+
+        if (delta > 0) {
+            current = next;
+            printf(" -> %d(h=%d)", current, h[current]);
+        } else {
+            float probability = exp((float)delta / T);
+
+            if (probability > 0.90) {
+                current = next;
+                printf(" -> %d(h=%d)", current, h[current]);
+            } else {
+                break;
+            }
+        }
+
+        T = T * cooling;
+    }
+
+    printf("\n\nFinal State = %d", current);
+    printf("\nHeuristic Value = %d", h[current]);
+
+    if (current == goalState)
+        printf("\nGoal Reached\n");
+    else
+        printf("\nGoal Not Reached\n");
+
+    return 0;
+}
+
+-------
+Simulated Annealing(equation)
+
+import java.util.Random;
+
+public class SimulatedAnnealing {
+
+    static Random random = new Random();
+
+    // Objective function
+    static double f(double x, double y) {
+        return x * x + y * y;
+    }
+
+    public static void main(String[] args) {
+
+        double x = random.nextDouble() * 20 - 10;
+        double y = random.nextDouble() * 20 - 10;
+
+        double currentValue = f(x, y);
+
+        double temperature = 1000.0;
+        double coolingRate = 0.995;
+        double minTemperature = 0.001;
+
+        while (temperature > minTemperature) {
+
+            // Generate neighboring solution
+            double newX = x + (random.nextDouble() * 2 - 1);
+            double newY = y + (random.nextDouble() * 2 - 1);
+
+            double newValue = f(newX, newY);
+            double delta = newValue - currentValue;
+
+            // Accept better solution or sometimes worse solution
+            if (delta < 0 ||
+                random.nextDouble() < Math.exp(-delta / temperature)) {
+
+                x = newX;
+                y = newY;
+                currentValue = newValue;
+            }
+
+            // Reduce temperature
+            temperature *= coolingRate;
+        }
+
+        System.out.println("Best x = " + x);
+        System.out.println("Best y = " + y);
+        System.out.println("Minimum value = " + currentValue);
+    }
+}
+
+-------------------
+Simulated Annealing(graph)
+Simulated Annealing for Graph — C Code
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+#define MAX 20
+
+int graph[MAX][MAX];
+
+int main() {
+    int n, e, h[MAX];
+    int current = 0, goalState = 0;
+
+    srand(time(NULL));
+
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+
+    printf("Enter number of edges: ");
+    scanf("%d", &e);
+
+    printf("Enter each edge (source destination cost):\n");
+
+    for (int i = 0; i < e; i++) {
+        int u, v, cost;
+        scanf("%d %d %d", &u, &v, &cost);
+
+        graph[u - 1][v - 1] = cost;
+        graph[v - 1][u - 1] = cost;
+    }
+
+    printf("Enter heuristic values:\n");
+
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &h[i]);
+
+        if (h[i] < h[goalState])
+            goalState = i;
+    }
+
+    printf("Enter source vertex: ");
+    scanf("%d", &current);
+    current--;
+
+    double T = 100.0;
+    double cooling = 0.90;
+
+    printf("\nPath:\n%d", current + 1);
+
+    while (T > 0.1 && current != goalState) {
+        int neighbors[MAX], count = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (graph[current][i] > 0)
+                neighbors[count++] = i;
+        }
+
+        if (count == 0)
+            break;
+
+        int next = neighbors[rand() % count];
+
+        int delta = h[next] - h[current];
+
+        if (delta < 0 ||
+            (double)rand() / RAND_MAX < exp((double)-delta / T)) {
+            current = next;
+            printf(" -> %d", current + 1);
+        }
+
+        T *= cooling;
+    }
+
+    printf("\nFinal State = %d\n", current + 1);
+    printf("Goal State = %d\n", goalState + 1);
+
+    if (current == goalState)
+        printf("Goal Reached\n");
+    else
+        printf("Goal Not Reached\n");
+
+    return 0;
+}
+
+
+Sample Input
+Enter number of vertices: 5
+Enter number of edges: 6
+Enter each edge (source destination cost):
+1 2 1
+1 3 4
+2 3 2
+2 4 5
+3 4 1
+4 5 3
+Enter heuristic values:
+7 6 4 3 0
+Enter source vertex: 1
+
+
+Sample Output
+Path:
+1 -> 2 -> 3 -> 4 -> 5
+Final State = 5
+Goal State = 5
+Goal Reached
+
+
+Note: Simulated Annealing is probabilistic, so the path and final state may vary between runs. Compile using:
+gcc main.c -o main -lm
+----------------------------------
+Hill Climbing – Local Search Method
+import random
+
+def f(x):
+    return -(x - 5) ** 2 + 25
+
+x = random.randint(0, 10)
+
+while True:
+    current = f(x)
+
+    left = x - 1
+    right = x + 1
+
+    if left >= 0 and f(left) > current:
+        x = left
+    elif right <= 10 and f(right) > current:
+        x = right
+    else:
+        break
+
+print("Best State:", x)
+print("Maximum Value:", f(x))
+----------------------------
+
+tictactoe
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+char board[9] = {'1','2','3','4','5','6','7','8','9'};
+
+void display() {
+    printf("\n");
+    printf(" %c | %c | %c\n", board[0], board[1], board[2]);
+    printf("---|---|---\n");
+    printf(" %c | %c | %c\n", board[3], board[4], board[5]);
+    printf("---|---|---\n");
+    printf(" %c | %c | %c\n", board[6], board[7], board[8]);
+}
+
+int checkWin(char p) {
+    if (board[0] == p && board[1] == p && board[2] == p) return 1;
+    if (board[3] == p && board[4] == p && board[5] == p) return 1;
+    if (board[6] == p && board[7] == p && board[8] == p) return 1;
+
+    if (board[0] == p && board[3] == p && board[6] == p) return 1;
+    if (board[1] == p && board[4] == p && board[7] == p) return 1;
+    if (board[2] == p && board[5] == p && board[8] == p) return 1;
+
+    if (board[0] == p && board[4] == p && board[8] == p) return 1;
+    if (board[2] == p && board[4] == p && board[6] == p) return 1;
+
+    return 0;
+}
+
+int draw() {
+    for (int i = 0; i < 9; i++) {
+        if (board[i] != 'X' && board[i] != 'O')
+            return 0;
+    }
+    return 1;
+}
+
+int main() {
+    int pos, ai;
+    srand(time(NULL));
+
+    while (1) {
+        display();
+
+        printf("Enter position (1-9): ");
+        scanf("%d", &pos);
+
+        if (pos < 1 || pos > 9) {
+            printf("Invalid position!\n");
+            continue;
+        }
+
+        if (board[pos - 1] == 'X' || board[pos - 1] == 'O') {
+            printf("Position already occupied!\n");
+            continue;
+        }
+
+        board[pos - 1] = 'X';
+        display();
+
+        if (checkWin('X')) {
+            printf("Player Wins!\n");
+            break;
+        }
+
+        if (draw()) {
+            printf("Match Draw!\n");
+            break;
+        }
+
+        do {
+            ai = rand() % 9;
+        } while (board[ai] == 'X' || board[ai] == 'O');
+
+        board[ai] = 'O';
+        printf("AI selected position %d\n", ai + 1);
+
+        if (checkWin('O')) {
+            display();
+            printf("AI Wins!\n");
+            break;
+        }
+
+        if (draw()) {
+            display();
+            printf("Match Draw!\n");
+            break;
+        }
+    }
+
+    return 0;
+}
+
+-------------------------------------
+
+cryptarrithmetic
+
+#include <stdio.h>
+#include <string.h>
+
+char a[20], b[20], c[20];
+char letters[10];
+int map[256];
+int used[10];
+int n = 0;
+
+int check() {
+    long x = 0, y = 0, z = 0;
+
+    for (int i = 0; a[i]; i++)
+        x = x * 10 + map[(int)a[i]];
+
+    for (int i = 0; b[i]; i++)
+        y = y * 10 + map[(int)b[i]];
+
+    for (int i = 0; c[i]; i++)
+        z = z * 10 + map[(int)c[i]];
+
+    return (x + y == z);
+}
+
+int solve(int idx) {
+    if (idx == n)
+        return check();
+
+    for (int d = 0; d <= 9; d++) {
+        if (!used[d]) {
+            used[d] = 1;
+            map[(int)letters[idx]] = d;
+
+            if (solve(idx + 1))
+                return 1;
+
+            used[d] = 0;
+            map[(int)letters[idx]] = -1;
+        }
+    }
+
+    return 0;
+}
+
+int main() {
+    scanf("%19s %19s %19s", a, b, c);
+
+    for (int i = 0; i < 256; i++)
+        map[i] = -1;
+
+    for (int i = 0; a[i]; i++) {
+        if (map[(int)a[i]] == -1) {
+            map[(int)a[i]] = -2;
+            letters[n++] = a[i];
+        }
+    }
+
+    for (int i = 0; b[i]; i++) {
+        if (map[(int)b[i]] == -1) {
+            map[(int)b[i]] = -2;
+            letters[n++] = b[i];
+        }
+    }
+
+    for (int i = 0; c[i]; i++) {
+        if (map[(int)c[i]] == -1) {
+            map[(int)c[i]] = -2;
+            letters[n++] = c[i];
+        }
+    }
+
+    if (n > 10) {
+        printf("-1\n");
+        return 0;
+    }
+
+    for (int i = 0; i < n; i++)
+        map[(int)letters[i]] = -1;
+
+    if (solve(0)) {
+        for (int i = 0; a[i]; i++)
+            printf("%d", map[(int)a[i]]);
+        printf("\n");
+
+        for (int i = 0; b[i]; i++)
+            printf("%d", map[(int)b[i]]);
+        printf("\n");
+
+        for (int i = 0; c[i]; i++)
+            printf("%d", map[(int)c[i]]);
+        printf("\n");
+    } else {
+        printf("-1\n");
+    }
+
+    return 0;
+}
+
+python
+
+def check(a, b, c, letters, mapping):
+    x = int(''.join(str(mapping[ch]) for ch in a))
+    y = int(''.join(str(mapping[ch]) for ch in b))
+    z = int(''.join(str(mapping[ch]) for ch in c))
+
+    return x + y == z
+
+
+def solve(idx, letters, mapping, used, a, b, c):
+    if idx == len(letters):
+        return check(a, b, c, letters, mapping)
+
+    ch = letters[idx]
+
+    for d in range(10):
+        if d not in used:
+            mapping[ch] = d
+            used.add(d)
+
+            if solve(idx + 1, letters, mapping, used, a, b, c):
+                return True
+
+            used.remove(d)
+            del mapping[ch]
+
+    return False
+
+
+a, b, c = input().split()
+
+letters = list(dict.fromkeys(a + b + c))
+
+if len(letters) > 10:
+    print(-1)
+else:
+    mapping = {}
+    used = set()
+
+    if solve(0, letters, mapping, used, a, b, c):
+        print(''.join(str(mapping[ch]) for ch in a))
+        print(''.join(str(mapping[ch]) for ch in b))
+        print(''.join(str(mapping[ch]) for ch in c))
+    else:
+        print(-1)
+
+-------------------
+water jug 
+
+import java.util.*;
+
+public class WaterJug {
+
+    static int A, B, goal;
+    static Set<String> visited = new HashSet<>();
+
+    static boolean solve(int a, int b) {
+
+        if (a == goal || b == goal) {
+            System.out.println("(" + a + ", " + b + ")");
+            return true;
+        }
+
+        String state = a + "," + b;
+
+        if (visited.contains(state))
+            return false;
+
+        visited.add(state);
+
+        System.out.println("(" + a + ", " + b + ")");
+
+        int[][] next = {
+            {A, b},
+            {a, B},
+            {0, b},
+            {a, 0},
+            {Math.max(0, a - (B - b)),
+             Math.min(B, a + b)},
+            {Math.min(A, a + b),
+             Math.max(0, b - (A - a))}
+        };
+
+        for (int[] s : next) {
+            if (solve(s[0], s[1]))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Jug A capacity: ");
+        A = sc.nextInt();
+
+        System.out.print("Jug B capacity: ");
+        B = sc.nextInt();
+
+        System.out.print("Goal: ");
+        goal = sc.nextInt();
+
+        System.out.println("\nSolution:");
+
+        if (!solve(0, 0))
+            System.out.println("No solution exists.");
+
+        sc.close();
+    }
+}
+Jug A capacity: 4
+Jug B capacity: 3
+Goal: 2
+Solution:
+(0, 0)
+(4, 0)
+(4, 3)
+(0, 3)
+(3, 0)
+(3, 3)
+(4, 2)
+(0, 2)
+(2, 0)
+
+---------------------
+cart pole
+import java.util.Random;
+import java.util.Scanner;
+
+public class CartPole {
+    public static void main(String[] args) {
+        Random random = new Random();
+        Scanner sc = new Scanner(System.in);
+
+        double position = 0.0;
+        double velocity = 0.0;
+        double angle = 0.05;
+        double angularVelocity = 0.0;
+
+        int reward = 0;
+
+        System.out.print("Enter maximum steps: ");
+        int maxSteps = sc.nextInt();
+
+        System.out.println("Cart-Pole Simulation");
+        System.out.println("--------------------");
+
+        for (int step = 1; step <= maxSteps; step++) {
+            int action = random.nextInt(2);
+            double force = (action == 0) ? -10.0 : 10.0;
+
+            velocity += force * 0.01;
+            position += velocity * 0.02;
+
+            angularVelocity +=
+                (9.8 * Math.sin(angle) - force * 0.01) * 0.02;
+
+            angle += angularVelocity * 0.02;
+
+            if (Math.abs(angle) < 0.2 &&
+                Math.abs(position) < 2.4) {
+                reward++;
+            } else {
+                System.out.println("Pole fell at step " + step);
+                break;
+            }
+
+            if (step % 10 == 0) {
+                System.out.println(
+                    "Step: " + step +
+                    " | Action: " +
+                    (action == 0 ? "Left" : "Right") +
+                    " | Reward: " + reward
+                );
+            }
+        }
+
+        System.out.println("Total Reward: " + reward);
+        System.out.println("Simulation completed.");
+
+        sc.close();
+    }
+}
+
+python
+import gymnasium as gym
+import random
+
+env = gym.make("CartPole-v1")
+
+state, info = env.reset()
+total_reward = 0
+
+for episode in range(10):
+    state, info = env.reset()
+    total_reward = 0
+
+    for step in range(500):
+        action = random.randint(0, 1)
+
+        state, reward, terminated, truncated, info = env.step(action)
+        total_reward += reward
+
+        if terminated or truncated:
+            break
+
+    print("Episode:", episode + 1)
+    print("Steps:", step + 1)
+    print("Total Reward:", total_reward)
+    print()
+
+env.close()
+Episode: 1
+Steps: 24
+Total Reward: 24.0
+
+Episode: 2
+Steps: 18
+Total Reward: 18.0
+
+Episode: 3
+Steps: 35
+Total Reward: 35.0
+
+...
+
+Episode: 10
+Steps: 21
+Total Reward: 21.0
+=> pip install gymnasium
+
+--------------------------------
+naive bayes
+
+email spam
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score
+
+# Training data
+emails = ["win money", "free prize", "meeting today",
+          "class tomorrow", "win prize", "hello friend"]
+
+y = ["Spam", "Spam", "Not Spam",
+     "Not Spam", "Spam", "Not Spam"]
+
+# Convert text into numbers
+v = CountVectorizer()
+X = v.fit_transform(emails)
+
+# Train the model
+model = MultinomialNB()
+model.fit(X, y)
+
+# Test accuracy on training data
+pred = model.predict(X)
+print("Accuracy:", accuracy_score(y, pred) * 100, "%")
+
+# Test a NEW email
+new_email = v.transform(["free money prize"])
+result = model.predict(new_email)
+
+print("Email:", "free money prize")
+print("Prediction:", result[0])
+
+-----------------
+5 data set accuracy
+
+from sklearn.naive_bayes import GaussianNB
+from sklearn.datasets import load_iris, load_wine
+from sklearn.datasets import load_digits, load_breast_cancer
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+datasets = [
+    load_iris(),
+    load_wine(),
+    load_digits(),
+    load_breast_cancer(),
+    make_classification(n_samples=100, n_features=4,
+                        n_classes=2, random_state=42)
+]
+
+for data in datasets:
+    if isinstance(data, tuple):
+        X, y = data
+    else:
+        X, y = data.data, data.target
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    model = GaussianNB()
+    model.fit(X_train, y_train)
+
+    pred = model.predict(X_test)
+
+    print("Prediction:", pred[:5])
+    print("Accuracy:", accuracy_score(y_test, pred) * 100, "%")
+    print()
+
+------------------------------
+Forward Chaining in Prolog (SWI-Prolog)
+
+Forward chaining is a reasoning technique that starts with known facts and applies rules to derive new facts until the goal is reached or no new facts can be generated.
+
+In SWI-Prolog, we can implement forward chaining using rules and a loop that repeatedly derives new facts.
+Example: Student Eligibility
+Facts and rules:
+- If a student studies, they pass.
+- If a student passes, they are eligible.
+- The student studies.
+Prolog program
+
+% Initial fact
+studies(raj).
+
+% Rules
+pass(X) :- studies(X).
+eligible(X) :- pass(X).
+
+% Forward chaining
+forward :-
+    (   studies(X),
+        \+ pass(X)
+    ->  assertz(pass(X)),
+        fail
+    ;   pass(X),
+        \+ eligible(X)
+    ->  assertz(eligible(X)),
+        fail
+    ;   true
+    ).
+
+
+
+Output in SWI-Prolog
+Run:
+?- forward.
+true.
+
+?- eligible(raj).
+true.
+
+
+How it works
+1. Initial fact: studies(raj) is already true.
+2. Apply Rule 1: studies(raj) derives pass(raj).
+3. Apply Rule 2: pass(raj) derives eligible(raj).
+4. Stop: No more new facts can be derived.
+Remember for exams:
+- Forward chaining = Facts → Rules → New Facts → Goal.
+- It is a data-driven reasoning technique.
+- It continues until the goal is reached or no new facts can be derived.
+
+------------------------------------
+min max
+import java.util.Scanner;
+
+public class Minimax {
+
+    static int minimax(int[] a, int start, int end, boolean isMax) {
+
+        if (start == end)
+            return a[start];
+
+        int mid = (start + end) / 2;
+
+        int left = minimax(a, start, mid, !isMax);
+        int right = minimax(a, mid + 1, end, !isMax);
+
+        if (isMax)
+            return Math.max(left, right);
+        else
+            return Math.min(left, right);
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of values: ");
+        int n = sc.nextInt();
+
+        int[] a = new int[n];
+
+        System.out.println("Enter values:");
+        for (int i = 0; i < n; i++)
+            a[i] = sc.nextInt();
+
+        System.out.print("Start with MAX or MIN: ");
+        String choice = sc.next();
+
+        boolean isMax = choice.equalsIgnoreCase("MAX");
+
+        int result = minimax(a, 0, n - 1, isMax);
+
+        System.out.println("Best value: " + result);
+    }
+}
+
+
+------------------
+
+graph color 
+Graph coloring 
+
+
+
+
+
+#include <stdio.h>
+
+#define V 4
+
+int graph[V][V] = {
+    {0, 1, 1, 0},
+    {1, 0, 1, 1},
+    {1, 1, 0, 1},
+    {0, 1, 1, 0}
+};
+
+int color[V];
+
+int isSafe(int v, int c) {
+    for (int i = 0; i < V; i++) {
+        if (graph[v][i] && color[i] == c)
+            return 0;
+    }
+    return 1;
+}
+
+int graphColoring(int v, int m) {
+    if (v == V)
+        return 1;
+
+    for (int c = 1; c <= m; c++) {
+        if (isSafe(v, c)) {
+            color[v] = c;
+
+            if (graphColoring(v + 1, m))
+                return 1;
+
+            color[v] = 0;  // Backtrack
+        }
+    }
+
+    return 0;
+}
+
+int main() {
+    int m = 3;
+
+    if (graphColoring(0, m)) {
+        printf("Color assignment:\n");
+
+        for (int i = 0; i < V; i++)
+            printf("Vertex %d -> Color %d\n", i, color[i]);
+    } else {
+        printf("No solution exists.\n");
+    }
+
+    return 0;
+}
+
+-------------------
+genetic algorithm 
+
+Genitic
+
+import java.util.*;
+
+public class GeneticAlgorithm {
+
+    static int fitness(String chromosome) {
+        int x = Integer.parseInt(chromosome, 2);
+        return x * x;
+    }
+
+    public static void main(String[] args) {
+
+        // Initial population
+        String[] population = {
+            "01010", "01100", "00111",
+            "11001", "10010", "01001"
+        };
+
+        Random random = new Random();
+
+        for (int generation = 1; generation <= 10; generation++) {
+
+            // Find best two parents
+            Arrays.sort(population,
+                (a, b) -> fitness(b) - fitness(a));
+
+            String parent1 = population[0];
+            String parent2 = population[1];
+
+            // One-point crossover
+            int point = random.nextInt(parent1.length() - 1) + 1;
+
+            String child = parent1.substring(0, point)
+                         + parent2.substring(point);
+
+            // Mutation
+            if (random.nextDouble() < 0.2) {
+                int index = random.nextInt(child.length());
+
+                char[] bits = child.toCharArray();
+                bits[index] = (bits[index] == '0') ? '1' : '0';
+
+                child = new String(bits);
+            }
+
+            // Replace weakest
+            population[population.length - 1] = child;
+
+            System.out.println(
+                "Generation " + generation +
+                " | Best = " + Integer.parseInt(population[0], 2) +
+                " | Fitness = " + fitness(population[0])
+            );
+        }
+
+        Arrays.sort(population,
+            (a, b) -> fitness(b) - fitness(a));
+
+        int best = Integer.parseInt(population[0], 2);
+
+        System.out.println("\nBest Solution = " + best);
+        System.out.println("Best Fitness = " + fitness(population[0]));
+    }
+}
+
+--------------------------------
+CartPole – Reinforcement Learning (Q-Learning)
+Application: Train an agent to balance a pole on a moving cart
+
+import gymnasium as gym
+import numpy as np
+import random
+
+env = gym.make("CartPole-v1")
+
+# Q-table for 4 state variables and 2 actions
+Q = np.zeros((6, 12, 6, 12, 2))
+
+bins = [
+    np.linspace(-2.4, 2.4, 7),
+    np.linspace(-3, 3, 13),
+    np.linspace(-0.2095, 0.2095, 7),
+    np.linspace(-3.5, 3.5, 13)
+]
+
+def get_state(state):
+    return tuple(
+        np.digitize(state[i], bins[i][1:-1])
+        for i in range(4)
+    )
+
+alpha = 0.1
+gamma = 0.99
+epsilon = 1.0
+
+# Training the agent
+for episode in range(1000):
+    state, info = env.reset()
+    state = get_state(state)
+    total_reward = 0
+
+    for step in range(500):
+        if random.random() < epsilon:
+            action = env.action_space.sample()
+        else:
+            action = np.argmax(Q[state])
+
+        next_state, reward, terminated, truncated, info = env.step(action)
+        next_state = get_state(next_state)
+
+        done = terminated or truncated
+
+        Q[state][action] += alpha * (
+            reward + gamma * np.max(Q[next_state]) * (not done)
+            - Q[state][action]
+        )
+
+        state = next_state
+        total_reward += reward
+
+        if done:
+            break
+
+    epsilon = max(0.01, epsilon * 0.995)
+
+    if (episode + 1) % 100 == 0:
+        print("Episode:", episode + 1,
+              "Reward:", total_reward,
+              "Epsilon:", round(epsilon, 3))
+
+# Test the trained agent
+print("\nTesting trained agent:")
+
+for episode in range(5):
+    state, info = env.reset()
+    state = get_state(state)
+    total_reward = 0
+
+    for step in range(500):
+        action = np.argmax(Q[state])
+        next_state, reward, terminated, truncated, info = env.step(action)
+        state = get_state(next_state)
+        total_reward += reward
+
+        if terminated or truncated:
+            break
+
+    print("Test Episode:", episode + 1,
+          "Reward:", total_reward)
+
+env.close()
+=> pip install gymnasium numpy
+----------------------------
+
+Tic-Tac-Toe using Minimax — C
+
+#include <stdio.h>
+
+char board[9] = {'1','2','3','4','5','6','7','8','9'};
+
+void display() {
+    printf("\n");
+    printf(" %c | %c | %c\n", board[0], board[1], board[2]);
+    printf("---|---|---\n");
+    printf(" %c | %c | %c\n", board[3], board[4], board[5]);
+    printf("---|---|---\n");
+    printf(" %c | %c | %c\n", board[6], board[7], board[8]);
+}
+
+int checkWin(char p) {
+    if (board[0] == p && board[1] == p && board[2] == p) return 1;
+    if (board[3] == p && board[4] == p && board[5] == p) return 1;
+    if (board[6] == p && board[7] == p && board[8] == p) return 1;
+
+    if (board[0] == p && board[3] == p && board[6] == p) return 1;
+    if (board[1] == p && board[4] == p && board[7] == p) return 1;
+    if (board[2] == p && board[5] == p && board[8] == p) return 1;
+
+    if (board[0] == p && board[4] == p && board[8] == p) return 1;
+    if (board[2] == p && board[4] == p && board[6] == p) return 1;
+
+    return 0;
+}
+
+int draw() {
+    for (int i = 0; i < 9; i++) {
+        if (board[i] != 'X' && board[i] != 'O')
+            return 0;
+    }
+    return 1;
+}
+
+int minimax(int isMax) {
+    if (checkWin('O')) return 1;
+    if (checkWin('X')) return -1;
+    if (draw()) return 0;
+
+    int best = isMax ? -100 : 100;
+
+    for (int i = 0; i < 9; i++) {
+        if (board[i] != 'X' && board[i] != 'O') {
+            char old = board[i];
+
+            board[i] = isMax ? 'O' : 'X';
+            int score = minimax(!isMax);
+            board[i] = old;
+
+            if (isMax && score > best)
+                best = score;
+
+            if (!isMax && score < best)
+                best = score;
+        }
+    }
+
+    return best;
+}
+
+int main() {
+    int pos, best, move;
+
+    while (1) {
+        display();
+
+        printf("Enter position (1-9): ");
+        scanf("%d", &pos);
+
+        if (pos < 1 || pos > 9 ||
+            board[pos - 1] == 'X' ||
+            board[pos - 1] == 'O') {
+            printf("Invalid position!\n");
+            continue;
+        }
+
+        board[pos - 1] = 'X';
+
+        if (checkWin('X')) {
+            display();
+            printf("Player Wins!\n");
+            break;
+        }
+
+        if (draw()) {
+            display();
+            printf("Match Draw!\n");
+            break;
+        }
+
+        best = -100;
+        move = -1;
+
+        for (int i = 0; i < 9; i++) {
+            if (board[i] != 'X' && board[i] != 'O') {
+                char old = board[i];
+
+                board[i] = 'O';
+                int score = minimax(0);
+                board[i] = old;
+
+                if (score > best) {
+                    best = score;
+                    move = i;
+                }
+            }
+        }
+
+        board[move] = 'O';
+        printf("Computer chose position %d\n", move + 1);
+
+        if (checkWin('O')) {
+            display();
+            printf("Computer Wins!\n");
+            break;
+        }
+
+        if (draw()) {
+            display();
+            printf("Match Draw!\n");
+            break;
+        }
+    }
+
+    return 0;
+}
+
+------------------------------
+
+User input ,
+Here is the A algorithm in C with user input*, including overestimated heuristic values to demonstrate a suboptimal solution.
+
+#include <stdio.h>
+
+#define N 4
+#define INF 9999
+
+int main() {
+    int cost[N][N], h[N];
+    int g[N], f[N], parent[N];
+    int open[N] = {0}, closed[N] = {0};
+    char node[N] = {'S', 'A', 'B', 'G'};
+
+    printf("Enter cost matrix (4x4):\n");
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            scanf("%d", &cost[i][j]);
+
+    printf("Enter heuristic values for S A B G:\n");
+    for (int i = 0; i < N; i++)
+        scanf("%d", &h[i]);
+
+    for (int i = 0; i < N; i++) {
+        g[i] = INF;
+        f[i] = INF;
+        parent[i] = -1;
+    }
+
+    g[0] = 0;
+    f[0] = h[0];
+    open[0] = 1;
+
+    while (1) {
+        int current = -1, minF = INF;
+
+        for (int i = 0; i < N; i++) {
+            if (open[i] && f[i] < minF) {
+                minF = f[i];
+                current = i;
+            }
+        }
+
+        if (current == -1 || current == 3)
+            break;
+
+        open[current] = 0;
+        closed[current] = 1;
+
+        for (int i = 0; i < N; i++) {
+            if (cost[current][i] > 0 && !closed[i]) {
+                int newG = g[current] + cost[current][i];
+
+                if (newG < g[i]) {
+                    g[i] = newG;
+                    f[i] = g[i] + h[i];
+                    parent[i] = current;
+                    open[i] = 1;
+                }
+            }
+        }
+    }
+
+    if (g[3] == INF) {
+        printf("No path found\n");
+        return 0;
+    }
+
+    int path[N], count = 0;
+
+    for (int v = 3; v != -1; v = parent[v])
+        path[count++] = v;
+
+    printf("Path: ");
+    for (int i = count - 1; i >= 0; i--) {
+        printf("%c", node[path[i]]);
+        if (i > 0) printf(" -> ");
+    }
+
+    printf("\nTotal cost = %d\n", g[3]);
+
+    return 0;
+}
+
+
+
+Sample input
+0 2 1 0
+2 0 0 2
+1 0 0 2
+0 2 2 0
+0 0 100 0
+
+
+Sample output
+Path: S -> A -> G
+Total cost = 4
+
+
+Proof of suboptimality:
+- A* finds S → A → G, cost = 4.
+- The optimal path is S → B → G, cost = 3.
+- Since the heuristic for B is overestimated as 100, A* selects the more expensive path.
+Note: Enter the nodes in the order S, A, B, G. Use 0 to indicate no edge.
+
+--------------------------------
+
+1. A* Search Strategy for Solving the 4-Puzzle Problem (Python)
+Aim: To implement the A* search algorithm to solve the 8-puzzle problem using the Manhattan distance heuristic.
+
+Algorithm:
+1. Read the initial puzzle state.
+2. Set the goal state as 1 2 3 / 4 5 6 / 7 8 0.
+3. Calculate \(f(n)=g(n)+h(n)\).
+4. Select the state with the lowest \(f(n)\).
+5. Generate neighboring states by moving the blank tile (0).
+6. Repeat until the goal state is reached.
+Python program
+
+import heapq
+
+goal = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+def heuristic(state):
+    distance = 0
+
+    for i in range(9):
+        if state[i] != 0:
+            target = state[i] - 1
+            distance += abs(i // 3 - target // 3)
+            distance += abs(i % 3 - target % 3)
+
+    return distance
+
+def astar(start):
+    pq = [(heuristic(start), 0, start, [])]
+    visited = set()
+
+    while pq:
+        f, g, state, path = heapq.heappop(pq)
+
+        if state in visited:
+            continue
+
+        visited.add(state)
+        path = path + [state]
+
+        if state == goal:
+            for step in path:
+                print(step[:3])
+                print(step[3:6])
+                print(step[6:])
+                print()
+            print("Steps:", g)
+            return
+
+        zero = state.index(0)
+        row, col = zero // 3, zero % 3
+
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        for dr, dc in moves:
+            nr, nc = row + dr, col + dc
+
+            if 0 <= nr < 3 and 0 <= nc < 3:
+                new_zero = nr * 3 + nc
+                new_state = list(state)
+
+                new_state[zero], new_state[new_zero] = (
+                    new_state[new_zero], new_state[zero]
+                )
+
+                new_state = tuple(new_state)
+
+                if new_state not in visited:
+                    heapq.heappush(
+                        pq,
+                        (g + 1 + heuristic(new_state),
+                         g + 1, new_state, path)
+                    )
+
+start = tuple(map(int, input("Enter 9 numbers (0 for blank): ").split()))
+astar(start)
+
+
+Sample input
+1 2 3 4 0 6 7 5 8
+
+
+Sample output
+(1, 2, 3)
+(4, 0, 6)
+(7, 5, 8)
+
+(1, 2, 3)
+(4, 5, 6)
+(7, 0, 8)
+
+(1, 2, 3)
+(4, 5, 6)
+(7, 8, 0)
+
+Steps: 2
+
+
+Result: The A* search algorithm solves the 8-puzzle problem using the Manhattan distance heuristic and finds the solution in 2 moves.
+
+Note: The 8-puzzle uses a 3×3 board with 8 numbered tiles and one blank space. If your lab specifically requires a 4×4 puzzle (15-puzzle), the board and goal state must be changed.
+
+-----------------------
+Prolog Program: Knowledge Base and Backward Chaining
+1. Given knowledge base
+1. If a person works hard, they succeed.
+2. If a person succeeds, they get promoted.
+3. Anita works hard.
+Goal: Prove that Anita gets promoted using backward chaining in SWI-Prolog.
+2. Full Prolog code
+
+% Facts
+works_hard(anita).
+
+% Rules
+succeeds(X) :- works_hard(X).
+gets_promoted(X) :- succeeds(X).
+
+% Query:
+% ?- gets_promoted(anita).
+
+
+
+3. Output
+Run the query in SWI-Prolog:
+?- gets_promoted(anita).
+
+
+Output:
+true.
+
+-----------------------------
+prolog 
+
+:- = IF
+-> = THEN
+; = OR / ELSE
+, = AND
+\+ = NOT
+is = Arithmetic evaluation
+= = Unification
+\= = Not unifiable
+=:= = Arithmetic equal
+=\= = Arithmetic not equal
+! = CUT
+. = End of statement
+
+-----------------------------
+
