@@ -1890,4 +1890,701 @@ is = Arithmetic evaluation
 . = End of statement
 
 -----------------------------
+import java.util.*;
+
+public class GeneticAlgorithm {
+
+    static int fitness(String chromosome) {
+        int x = Integer.parseInt(chromosome, 2);
+        return x * x;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter population size: ");
+        int n = sc.nextInt();
+
+        String[] population = new String[n];
+
+        // Get numbers from user and convert to binary
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter number " + (i + 1) + ": ");
+            int number = sc.nextInt();
+
+            population[i] = Integer.toBinaryString(number);
+        }
+
+        // Make all chromosomes the same length
+        int maxLength = 0;
+
+        for (String chromosome : population) {
+            maxLength = Math.max(maxLength, chromosome.length());
+        }
+
+        for (int i = 0; i < n; i++) {
+            population[i] =
+                String.format("%" + maxLength + "s",
+                    population[i]).replace(' ', '0');
+        }
+
+        Random random = new Random();
+
+        System.out.println("\nInitial Population:");
+        System.out.println(Arrays.toString(population));
+
+        for (int generation = 1; generation <= 10; generation++) {
+
+            // Sort by fitness in descending order
+            Arrays.sort(population,
+                (a, b) -> Integer.compare(fitness(b), fitness(a)));
+
+            // Select the best two parents
+            String parent1 = population[0];
+            String parent2 = population[1];
+
+            // One-point crossover
+            int point = random.nextInt(parent1.length() - 1) + 1;
+
+            String child = parent1.substring(0, point)
+                         + parent2.substring(point);
+
+            // Mutation
+            if (random.nextDouble() < 0.2) {
+                int index = random.nextInt(child.length());
+
+                char[] bits = child.toCharArray();
+                bits[index] = (bits[index] == '0') ? '1' : '0';
+
+                child = new String(bits);
+            }
+
+            // Replace the weakest chromosome
+            population[n - 1] = child;
+
+            // Sort again to display the current best
+            Arrays.sort(population,
+                (a, b) -> Integer.compare(fitness(b), fitness(a)));
+
+            System.out.println(
+                "Generation " + generation
+                + " | Best = " + Integer.parseInt(population[0], 2)
+                + " | Fitness = " + fitness(population[0])
+            );
+        }
+
+        Arrays.sort(population,
+            (a, b) -> Integer.compare(fitness(b), fitness(a)));
+
+        int best = Integer.parseInt(population[0], 2);
+
+        System.out.println("\nFinal Population:");
+        System.out.println(Arrays.toString(population));
+
+        System.out.println("Best Solution = " + best);
+        System.out.println("Best Fitness = " + fitness(population[0]));
+
+        sc.close();
+    }
+}
+
+--------------------------------------------------
+
+
+import java.util.*;
+
+class Main {
+    static String goal = "1230";
+
+    static int heuristic(String s) {
+        int h = 0;
+        for (int i = 0; i < 4; i++)
+            if (s.charAt(i) != '0' && s.charAt(i) != goal.charAt(i))
+                h++;
+        return h;
+    }
+
+    static void solve(String start) {
+        Map<String, Integer> cost = new HashMap<>();
+        Map<String, String> parent = new HashMap<>();
+
+        PriorityQueue<String> pq = new PriorityQueue<>(
+            Comparator.comparingInt(s -> cost.get(s) + heuristic(s))
+        );
+
+        cost.put(start, 0);
+        pq.add(start);
+
+        while (!pq.isEmpty()) {
+            String cur = pq.poll();
+
+            if (cur.equals(goal)) {
+                List<String> path = new ArrayList<>();
+                while (cur != null) {
+                    path.add(cur);
+                    cur = parent.get(cur);
+                }
+                Collections.reverse(path);
+
+                System.out.println("Solution Path:");
+                for (String s : path)
+                    System.out.println(s.substring(0, 2) + "\n" + s.substring(2, 4) + "\n");
+                System.out.println("Moves: " + (path.size() - 1));
+                return;
+            }
+
+            int g = cost.get(cur);
+            int zero = cur.indexOf('0');
+            int r = zero / 2, c = zero % 2;
+
+            int[] dr = {-1, 1, 0, 0};
+            int[] dc = {0, 0, -1, 1};
+
+            for (int i = 0; i < 4; i++) {
+                int nr = r + dr[i], nc = c + dc[i];
+
+                if (nr >= 0 && nr < 2 && nc >= 0 && nc < 2) {
+                    int nz = nr * 2 + nc;
+                    char[] a = cur.toCharArray();
+                    a[zero] = a[nz];
+                    a[nz] = '0';
+                    String next = new String(a);
+
+                    if (g + 1 < cost.getOrDefault(next, Integer.MAX_VALUE)) {
+                        cost.put(next, g + 1);
+                        parent.put(next, cur);
+                        pq.add(next);
+                    }
+                }
+            }
+        }
+
+        System.out.println("No solution");
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter 4 puzzle tiles (0 for blank):");
+        String start = sc.next();
+
+        if (!start.matches("[0-3]{4}") ||
+            start.chars().distinct().count() != 4) {
+            System.out.println("Invalid input. Enter digits 0, 1, 2, 3 once each.");
+            return;
+        }
+
+        solve(start);
+        sc.close();
+    }
+}
+
+
+----------
+
+import java.util.*;
+
+class Main {
+    static String goal = "123456780";
+
+    static int heuristic(String s) {
+        int h = 0;
+        for (int i = 0; i < 9; i++) {
+            if (s.charAt(i) != '0' && s.charAt(i) != goal.charAt(i))
+                h++;
+        }
+        return h;
+    }
+
+    static void solve(String start) {
+        Map<String, Integer> cost = new HashMap<>();
+        Map<String, String> parent = new HashMap<>();
+
+        PriorityQueue<String> pq = new PriorityQueue<>(
+            Comparator.comparingInt(s -> cost.get(s) + heuristic(s))
+        );
+
+        cost.put(start, 0);
+        pq.add(start);
+
+        while (!pq.isEmpty()) {
+            String cur = pq.poll();
+
+            if (cur.equals(goal)) {
+                List<String> path = new ArrayList<>();
+                while (cur != null) {
+                    path.add(cur);
+                    cur = parent.get(cur);
+                }
+                Collections.reverse(path);
+
+                System.out.println("Solution Path:");
+                for (String s : path) {
+                    System.out.println(s.substring(0, 3));
+                    System.out.println(s.substring(3, 6));
+                    System.out.println(s.substring(6, 9));
+                    System.out.println();
+                }
+                System.out.println("Moves: " + (path.size() - 1));
+                return;
+            }
+
+            int g = cost.get(cur);
+            int zero = cur.indexOf('0');
+            int[] dr = {-1, 1, 0, 0};
+            int[] dc = {0, 0, -1, 1};
+
+            for (int i = 0; i < 4; i++) {
+                int nr = zero / 3 + dr[i];
+                int nc = zero % 3 + dc[i];
+
+                if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) {
+                    int nz = nr * 3 + nc;
+                    char[] a = cur.toCharArray();
+                    a[zero] = a[nz];
+                    a[nz] = '0';
+                    String next = new String(a);
+
+                    if (g + 1 < cost.getOrDefault(next, Integer.MAX_VALUE)) {
+                        cost.put(next, g + 1);
+                        parent.put(next, cur);
+                        pq.add(next);
+                    }
+                }
+            }
+        }
+
+        System.out.println("No solution");
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Enter 9 digits (0 for blank, e.g. 123456708):");
+        String start = sc.next();
+
+        if (!start.matches("[0-8]{9}") ||
+            start.chars().distinct().count() != 9) {
+            System.out.println("Invalid input. Enter digits 0 to 8 exactly once.");
+            sc.close();
+            return;
+        }
+
+        solve(start);
+        sc.close();
+    }
+}
+
+-----------------------
+---------------------------------------------------
+
+# PEAS Description for 10 AI Applications — Detailed Answer
+
+## Definition of PEAS
+
+PEAS is a framework used in Artificial Intelligence to describe the task environment of an intelligent agent. It specifies the agent's objectives, surroundings, actions and methods of collecting information.
+
+PEAS stands for:
+
+1. P – Performance Measure: The criteria used to evaluate how successfully the agent performs its task.
+2. E – Environment: The surroundings in which the agent operates and interacts.
+3. A – Actuators: The mechanisms through which the agent performs actions and affects the environment.
+4. S – Sensors: The mechanisms through which the agent receives information from the environment.
+
+## 1. Autonomous Taxi (Self-Driving Car)
+
+Description: An autonomous taxi is an AI-based vehicle that transports passengers to their destinations without requiring continuous human control. It observes road conditions, makes driving decisions and controls the vehicle automatically.
+
+P – Performance Measure
+
+- Ensure passenger and pedestrian safety.
+- Reach the correct destination.
+- Minimize travel time and fuel or energy consumption.
+- Follow traffic rules and road signs.
+- Avoid collisions and provide a comfortable journey.
+- Park safely and handle unexpected road conditions.
+
+E – Environment
+
+- City roads, highways and intersections.
+- Other vehicles, pedestrians and cyclists.
+- Traffic lights, road signs and speed limits.
+- Weather conditions such as rain, fog and sunlight.
+- Passengers, parking spaces and road obstacles.
+
+A – Actuators
+
+- Steering system to control the direction of the vehicle.
+- Accelerator to increase vehicle speed.
+- Braking system to slow down or stop the vehicle.
+- Indicators and headlights to communicate with other road users.
+- Horn and gear-control system to support safe driving.
+
+S – Sensors
+
+- Cameras to recognize traffic signs, lanes and pedestrians.
+- GPS to identify the vehicle's current location.
+- LiDAR to measure distances to surrounding objects.
+- Radar to detect nearby vehicles and their movement.
+- Ultrasonic sensors to detect obstacles during parking.
+
+Example: When a pedestrian suddenly crosses the road, the AI detects the pedestrian using its sensors, evaluates the situation and applies the brakes to avoid an accident.
+
+## 2. Medical Diagnosis System
+
+Description: An AI medical diagnosis system analyzes patient information, symptoms and medical test results to identify possible diseases and assist doctors in making clinical decisions.
+
+P – Performance Measure
+
+- Provide accurate diagnostic suggestions.
+- Minimize false-positive and false-negative results.
+- Identify serious diseases at an early stage.
+- Recommend appropriate tests for further investigation.
+- Generate reliable reports in a timely manner.
+- Protect patient information and support safe medical decisions.
+
+E – Environment
+
+- Hospitals, clinics and diagnostic laboratories.
+- Patients with different symptoms and medical conditions.
+- Electronic health records and medical databases.
+- Medical imaging departments.
+- Doctors, nurses and other healthcare professionals.
+
+A – Actuators
+
+- Display possible diagnoses and risk scores.
+- Generate diagnostic reports.
+- Alert doctors about potentially serious findings.
+- Suggest further medical investigations.
+- Present possible treatment options for professional review.
+
+S – Sensors
+
+- Patient symptoms and medical history entered into the system.
+- Blood test and laboratory results.
+- X-ray, CT scan and MRI images.
+- Vital signs such as temperature, pulse and blood pressure.
+- Information collected from electronic health records.
+
+Example: An AI system analyzes a patient's chest X-ray and symptoms and identifies a possible lung infection. It displays the findings for a qualified doctor to review before making the final diagnosis.
+
+## 3. Chess-Playing Agent
+
+Description: A chess-playing agent is an AI system that analyzes the chessboard, evaluates possible moves and selects suitable strategies to win or draw a game against a human or another computer.
+
+P – Performance Measure
+
+- Win the game or achieve a draw when appropriate.
+- Select legal and strategically strong moves.
+- Protect the king from checkmate.
+- Avoid unnecessary loss of valuable pieces.
+- Anticipate the opponent's possible moves.
+- Make decisions within the permitted time.
+
+E – Environment
+
+- Chessboard containing 64 squares.
+- Chess pieces belonging to both players.
+- Opponent and the opponent's moves.
+- Chess rules and the current board position.
+- Game clock and previous move history.
+
+A – Actuators
+
+- Move chess pieces on a digital chessboard.
+- Submit selected moves to the game interface.
+- Capture the opponent's pieces.
+- Perform legal moves such as castling and pawn promotion.
+- Display the selected move to the player.
+
+S – Sensors
+
+- Current positions of all chess pieces.
+- Opponent's latest move.
+- Legal moves available in the current position.
+- Remaining time on the game clock.
+- Current game status, including check, checkmate and draw.
+
+Example: If the opponent leaves their queen unprotected, the AI evaluates the available moves and captures the queen when doing so is legal and strategically beneficial.
+
+## 4. Vacuum Cleaner Robot
+
+Description: A robotic vacuum cleaner is an intelligent device that automatically cleans floors by detecting dirt, navigating rooms and avoiding obstacles.
+
+P – Performance Measure
+
+- Maximize the amount of floor cleaned.
+- Minimize cleaning time.
+- Reduce battery consumption.
+- Avoid collisions with furniture and other objects.
+- Prevent falls from stairs or elevated surfaces.
+- Return to the charging station when necessary.
+
+E – Environment
+
+- Houses, offices and rooms.
+- Floors, carpets and rugs.
+- Furniture, walls, doors and other obstacles.
+- Dust, dirt and small objects.
+- Charging dock and staircases.
+
+A – Actuators
+
+- Wheels and motors to move the robot.
+- Suction motor to collect dust and dirt.
+- Brushes to remove dirt from surfaces.
+- Steering controls to change direction.
+- Docking mechanism to connect to the charger.
+
+S – Sensors
+
+- Dirt sensors to identify dusty areas.
+- Obstacle sensors to detect nearby objects.
+- Bump sensors to detect physical contact.
+- Cliff sensors to identify stairs and drops.
+- Cameras or distance sensors to support navigation.
+
+Example: When the vacuum cleaner detects a wall, it changes direction and continues cleaning the remaining floor area. When its battery becomes low, it navigates back to the charging station.
+
+## 5. Intelligent Traffic Control System
+
+Description: An intelligent traffic control system uses AI to monitor traffic conditions and automatically adjust traffic signals to reduce congestion, improve traffic flow and increase road safety.
+
+P – Performance Measure
+
+- Reduce traffic congestion.
+- Minimize vehicle waiting time.
+- Improve traffic flow at intersections.
+- Reduce the risk of accidents.
+- Provide safe crossing opportunities for pedestrians.
+- Give appropriate priority to emergency vehicles.
+
+E – Environment
+
+- Roads, junctions and intersections.
+- Cars, buses, trucks and motorcycles.
+- Pedestrians and cyclists.
+- Traffic signals and pedestrian crossings.
+- Emergency vehicles and changing traffic conditions.
+
+A – Actuators
+
+- Traffic lights displaying red, yellow and green signals.
+- Pedestrian crossing signals.
+- Variable message signs.
+- Traffic information displays.
+- Signal timing controllers.
+
+S – Sensors
+
+- Traffic cameras to count and monitor vehicles.
+- Inductive loop detectors installed in roads.
+- Radar sensors to measure vehicle movement.
+- Pedestrian detection sensors.
+- Emergency vehicle detection or priority request systems.
+
+Example: If AI sensors detect heavy traffic on one road and lighter traffic on another, the system adjusts the green-light duration to improve traffic flow while maintaining safety rules.
+
+## 6. Weather Forecasting System
+
+Description: An AI weather forecasting system analyzes atmospheric measurements, satellite images and historical weather data to predict temperature, rainfall, storms and other weather conditions.
+
+P – Performance Measure
+
+- Improve weather prediction accuracy.
+- Predict rainfall and severe weather events reliably.
+- Issue warnings in a timely manner.
+- Minimize incorrect warnings and missed hazards.
+- Provide forecasts for the correct location and time.
+- Support disaster preparedness and public safety.
+
+E – Environment
+
+- Earth's atmosphere, land and oceans.
+- Different geographical locations.
+- Changing temperature, pressure and humidity.
+- Clouds, storms, rainfall and wind.
+- Seasonal and regional weather patterns.
+
+A – Actuators
+
+- Display weather forecasts on websites and applications.
+- Send severe-weather notifications.
+- Generate weather maps and reports.
+- Issue alerts to relevant authorities.
+- Update weather dashboards and warning systems.
+
+S – Sensors
+
+- Thermometers to measure temperature.
+- Barometers to measure atmospheric pressure.
+- Hygrometers to measure humidity.
+- Anemometers to measure wind speed.
+- Weather satellites, radar systems and rain gauges.
+
+Example: The AI analyzes satellite images, humidity, wind speed and atmospheric pressure to predict heavy rainfall. It then generates a forecast and sends an early warning to people in the affected region.
+
+## 7. Spam Email Detection System
+
+Description: A spam email detection system uses AI and machine learning to classify incoming emails as spam or legitimate messages. It helps protect users from unwanted advertisements, phishing attacks and suspicious content.
+
+P – Performance Measure
+
+- Correctly identify spam emails.
+- Minimize legitimate emails incorrectly marked as spam.
+- Prevent spam from reaching the inbox.
+- Classify messages quickly.
+- Detect suspicious and potentially harmful messages.
+- Adapt to new spam patterns over time.
+
+E – Environment
+
+- Email applications and servers.
+- Incoming and outgoing messages.
+- User inboxes and spam folders.
+- Email senders and recipient accounts.
+- Malicious links, phishing attempts and unwanted advertisements.
+
+A – Actuators
+
+- Move detected spam into the spam folder.
+- Label emails as spam or legitimate.
+- Flag suspicious messages.
+- Notify users about potentially dangerous emails.
+- Apply filtering rules based on classification results.
+- Incorporate user feedback to improve future filtering.
+
+S – Sensors
+
+- Email subject and message content.
+- Sender address and domain.
+- Links and attachment metadata.
+- Email headers and sending patterns.
+- User reports and previous spam classifications.
+
+Example: When an email contains suspicious links and misleading content, the AI classifies it as potentially spam and moves it to the spam folder according to the system's filtering rules.
+
+## 8. AI-Based Personal Assistant
+
+Description: An AI personal assistant understands voice or text commands and helps users perform tasks such as answering questions, setting reminders, managing schedules and controlling compatible smart devices.
+
+P – Performance Measure
+
+- Understand user commands accurately.
+- Provide relevant and correct answers.
+- Complete requested tasks successfully.
+- Respond quickly.
+- Minimize misunderstanding of commands.
+- Protect user privacy and obtain authorization for sensitive actions.
+
+E – Environment
+
+- Smartphones, computers and smart speakers.
+- Homes, offices and other user locations.
+- Calendar and reminder applications.
+- Connected devices and supported online services.
+- The user and the surrounding environment.
+
+A – Actuators
+
+- Speakers to provide spoken responses.
+- Screens to display information.
+- Notifications to deliver reminders.
+- Application controls to create calendar events.
+- Smart-device controls to perform authorized actions.
+
+S – Sensors
+
+- Microphone to receive voice commands.
+- Keyboard and touchscreen to receive user input.
+- Device sensors when relevant and permitted.
+- Calendar and application information from authorized services.
+- Contextual information such as requested dates and tasks.
+
+Example: When the user says, “Remind me to attend class at 9 AM,” the assistant interprets the command, creates the reminder and sends a notification at the appropriate time.
+
+## 9. Industrial Manufacturing Robot
+
+Description: An industrial manufacturing robot uses AI, sensors and mechanical actuators to perform manufacturing operations such as assembling components, welding, sorting products and inspecting finished goods.
+
+P – Performance Measure
+
+- Maintain high product quality.
+- Improve production speed and accuracy.
+- Minimize material waste.
+- Reduce machine downtime.
+- Maintain worker safety.
+- Complete assigned manufacturing tasks consistently.
+
+E – Environment
+
+- Factory floors and assembly lines.
+- Raw materials and workpieces.
+- Robotic workstations and conveyor belts.
+- Other machines and human workers.
+- Manufacturing equipment and designated safety zones.
+
+A – Actuators
+
+- Robotic arms and joints.
+- Electric motors and servo motors.
+- Grippers to hold and move components.
+- Welding tools and assembly tools.
+- Conveyor and positioning mechanisms.
+
+S – Sensors
+
+- Cameras to inspect components and identify defects.
+- Proximity sensors to detect nearby objects.
+- Force sensors to measure contact pressure.
+- Position sensors to determine joint locations.
+- Temperature and vibration sensors to monitor equipment.
+
+Example: A manufacturing robot identifies a component using a camera, picks it up with a robotic gripper and places it accurately in the correct position on an assembly line.
+
+## 10. Online Shopping Recommendation System
+
+Description: An online shopping recommendation system uses AI to suggest products based on customers' interests, browsing history, search queries, ratings and previous purchases.
+
+P – Performance Measure
+
+- Recommend relevant products.
+- Improve customer satisfaction.
+- Increase click-through and conversion rates.
+- Reduce irrelevant recommendations.
+- Provide personalized suggestions quickly.
+- Respect customer privacy and applicable data permissions.
+
+E – Environment
+
+- E-commerce websites and mobile applications.
+- Customers and their shopping accounts.
+- Product catalogues and inventory.
+- Shopping carts and order histories.
+- Product reviews, ratings and search results.
+
+A – Actuators
+
+- Display recommended products.
+- Arrange personalized product lists.
+- Show relevant offers and promotions.
+- Send authorized recommendation notifications.
+- Update the recommendation feed when customer interests change.
+
+S – Sensors
+
+- Customer search queries.
+- Product clicks and browsing history.
+- Previous purchases and shopping cart activity.
+- Product ratings and reviews.
+- Product information, prices and availability.
+
+Example: If a customer frequently searches for laptops and programming accessories, the AI analyzes this activity and recommends relevant laptops, keyboards and other compatible products.
+
+## Conclusion
+
+The PEAS framework helps define an AI agent's task environment before designing or implementing the system. Each component has a distinct role: Performance Measure evaluates success, Environment defines the surroundings, Actuators perform actions, and Sensors collect information. This framework can be applied to self-driving cars, medical diagnosis systems, robots, recommendation systems and many other intelligent applications.
+
+---------------------------------------
 
